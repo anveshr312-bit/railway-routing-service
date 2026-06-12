@@ -121,6 +121,13 @@ class ErrorResponse(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
+@app.get("/", tags=["health"])
+def root():
+    return {
+        "service": "Railway Routing Service",
+        "status": "running"
+    }
+
 @app.get("/health", tags=["health"])
 def health():
     return {"status": "ok"}
