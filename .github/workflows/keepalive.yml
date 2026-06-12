@@ -2,8 +2,8 @@ name: Hugging Face Space Keep-Alive
 
 on:
   schedule:
-    # Run every 15 minutes
-    - cron: '*/15 * * * *'
+    # Run every hour
+    - cron: '0 * * * *'
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -12,10 +12,19 @@ jobs:
     steps:
       - name: Ping Railway Routing Service Health Endpoint
         run: |
-          # Use curl with fail-fast (-f), silent (-s), and output HTTP status code
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://anveshr312-railway-routing-service.hf.space/health)
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "Executing health ping at $TIMESTAMP"
           
-          echo "Health endpoint returned HTTP status: $HTTP_STATUS"
+          # Use curl with explicit User-Agent. Store response body and HTTP code.
+          # -s: silent, -w: write-out format, -A: User-Agent
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -A "RailwayRoutingKeepAlive/1.0" https://anveshr312-railway-routing-service.hf.space/health)
+          
+          # Extract body and status code
+          BODY=$(echo "$RESPONSE" | sed -e '$ d')
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1 | grep -o 'HTTP_STATUS:[0-9]*' | cut -d':' -f2)
+          
+          echo "Response Code: $HTTP_STATUS"
+          echo "Response Body: $BODY"
           
           if [ "$HTTP_STATUS" -eq 200 ]; then
             echo "Service is healthy and awake."
