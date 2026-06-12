@@ -1,0 +1,26 @@
+name: Hugging Face Space Keep-Alive
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  ping-health-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Railway Routing Service Health Endpoint
+        run: |
+          # Use curl with fail-fast (-f), silent (-s), and output HTTP status code
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://anveshr312-railway-routing-service.hf.space/health)
+          
+          echo "Health endpoint returned HTTP status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "Service is healthy and awake."
+            exit 0
+          else
+            echo "Service is unreachable or unhealthy."
+            exit 1
+          fi
