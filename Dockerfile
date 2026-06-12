@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Create a non-root user with UID 1000 (Required by Hugging Face)
+RUN useradd -m -u 1000 user
+
 # Copy requirements and install
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -19,12 +22,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY . .
 
+# Change ownership of the app directory to the non-root user
+RUN chown -R user:user /app
+
+# Switch to the non-root user
+USER user
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV RAILWAYS_GPKG=/app/railways.gpkg
 
-# Expose port
-EXPOSE 8000
+# Expose Hugging Face default port
+EXPOSE 7860
 
-# Run uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run uvicorn on port 7860
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]

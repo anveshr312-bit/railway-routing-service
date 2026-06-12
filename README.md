@@ -1,3 +1,12 @@
+---
+title: Railway Routing Service
+emoji: 🚂
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+---
+
 # Railway Routing Service
 
 This is the FastAPI backend service that performs spatial routing algorithms across the Indian railway network.
