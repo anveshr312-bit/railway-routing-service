@@ -121,8 +121,13 @@ class ErrorResponse(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@app.get("/", tags=["health"])
+@app.get("/health", tags=["health"])
 def health():
+    return {"status": "ok"}
+
+
+@app.get("/graph-stats", tags=["health"])
+def graph_stats():
     rg = _rg
     if rg is None:
         return {"status": "loading"}
